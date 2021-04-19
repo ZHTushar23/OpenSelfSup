@@ -73,10 +73,6 @@ class ValidateHook(Hook):
 
         #validation loss criterion        
             target =   self.dataset.get_labels()
-            print("####################################################################################")
-            print(target)
-            print(results['head0'].shape)
-
             criterion = nn.CrossEntropyLoss()
             val_loss = criterion(torch.from_numpy(results['head0']), target)
 

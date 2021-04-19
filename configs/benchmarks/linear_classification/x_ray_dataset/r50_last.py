@@ -24,7 +24,7 @@ data_train_list = 'data/x_ray_dataset/meta/trainval_labeled.txt'
 data_train_root = 'data/x_ray_dataset/images'
 data_test_list = 'data/x_ray_dataset/meta/test_labeled.txt'
 data_test_root = 'data/x_ray_dataset/images'
-dataset_type = 'ClassificationDataset'
+dataset_type = 'MultiLabelClassificationDataset'
 
 img_norm_cfg = dict(mean=[0.5245, 0.5245, 0.5245], std =[0.2589, 0.2589, 0.2589])
 train_pipeline = [
@@ -59,7 +59,7 @@ data = dict(
 # additional hooks
 custom_hooks = [
     dict(
-        type='ValidateHook',
+        type='MultiValidateHook',
         dataset=data['val'],
         initial=True,
         interval=1,

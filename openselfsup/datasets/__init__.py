@@ -3,6 +3,7 @@ from .byol import BYOLDataset
 from .data_sources import *
 from .pipelines import *
 from .classification import ClassificationDataset
+from .multi_label_classification import MultiLabelClassificationDataset
 from .deepcluster import DeepClusterDataset
 from .extraction import ExtractDataset
 from .npid import NPIDDataset

@@ -25,6 +25,14 @@ class ImageListMultiLabel(object):
         self.mclient_path = mclient_path
         self.initialized = False
 
+        #An ugly way to get total number of classes
+        tmp = []
+        for element in range(len(self.labels)):
+            for item in self.labels[element]:
+                if int(item) not in tmp:
+                    tmp.append(int(item))
+        self.total_classes = len(tmp)
+
     def _init_memcached(self):
         if not self.initialized:
             assert self.mclient_path is not None
