@@ -1,17 +1,16 @@
 from mmcv.runner import Hook
-
-import torch
 import numpy
+import torch
+import mmcv
+import numpy as np
 from torch.utils.data import Dataset
-import torch.nn as nn
-
+from openselfsup.models.byol import BYOL
 from openselfsup.utils import nondist_forward_collect, dist_forward_collect
 from .registry import HOOKS
 
 
-
 @HOOKS.register_module
-class ValidateHook(Hook):
+class NewValidateHook(Hook):
     """Validation hook.
 
     Args:
@@ -65,34 +64,28 @@ class ValidateHook(Hook):
 
     def _run_validate(self, runner):
         runner.model.eval()
-        func = lambda **x: runner.model(mode='test', **x)
-        if self.dist_mode:
-            results = dist_forward_collect(
-                func, self.data_loader, runner.rank,
-                len(self.dataset))  # dict{key: np.ndarray}
+        results = []
+        prog_bar = mmcv.ProgressBar(len(self.data_loader))
+        for idx, data in enumerate(self.data_loader):
+            with torch.no_grad():
+                result = runner.model(data['img'],mode='test')  # dict{key: tensor}
+            results.append(result['loss'].cpu().numpy())
+            prog_bar.update()
 
-        #validation loss criterion        
-            target =   self.dataset.get_labels()
-            criterion = nn.CrossEntropyLoss()
-            val_loss = criterion(torch.from_numpy(results['head0']), target)
-
-            print("val_loss: ",val_loss)
-        else:
-            results = nondist_forward_collect(func, self.data_loader,
-                                              len(self.dataset))
+        eval_res = np.array(results).mean()
+        print(eval_res)
         if runner.rank == 0:
-            for name, val in results.items():
-                self._evaluate(runner, torch.from_numpy(val), name)
-        runner.log_buffer.output["val_loss"] = str(val_loss.numpy())
-        runner.log_buffer.ready = True
+            self._evaluate(runner, eval_res, 'loss')
+
+        # runner.log_buffer.output['loss'] = eval_res
+        # runner.log_buffer.ready = True
         runner.model.train()
 
     def _evaluate(self, runner, results, keyword):
         eval_res = self.dataset.evaluate(
             results,
             keyword=keyword,
-            logger=runner.logger,
-            **self.eval_kwargs['eval_param'])
-        for name, val in eval_res.items():
-            runner.log_buffer.output[name] = val
-        # runner.log_buffer.ready = True
+            logger=runner.logger)
+        for name,val in eval_res.items():
+            runner.log_buffer.output[name] = str(val)
+        runner.log_buffer.ready = True

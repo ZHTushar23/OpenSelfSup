@@ -106,7 +106,8 @@ class BYOL(nn.Module):
         if mode == 'train':
             return self.forward_train(img, **kwargs)
         elif mode == 'test':
-            return self.forward_test(img, **kwargs)
+            # return self.forward_test(img, **kwargs)
+            return self.forward_train(img, **kwargs)
         elif mode == 'extract':
             return self.backbone(img)
         else:

@@ -33,12 +33,18 @@ class ClassificationDataset(BaseDataset):
         _, pred = scores.topk(max(topk), dim=1, largest=True, sorted=True)
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))  # KxN
+
         for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0).item()
+            correct_k = correct[:k].contiguous().view(-1).float().sum(0).item()
             acc = correct_k * 100.0 / num
             eval_res["{}_top{}".format(keyword, k)] = acc
+
             if logger is not None and logger != 'silent':
                 print_log(
                     "{}_top{}: {:.03f}".format(keyword, k, acc),
                     logger=logger)
+
         return eval_res
+
+    def get_labels(self):
+        return torch.LongTensor(self.data_source.labels)

@@ -35,8 +35,10 @@ data_source_cfg = dict(
     type='ImageNet',
     memcached=True,
     mclient_path='/mnt/lustre/share/memcached_client')
-data_train_list = 'data/imagenet/meta/train.txt'
-data_train_root = 'data/imagenet/train'
+#data_train_list = 'data/imagenet/meta/train.txt'
+#data_train_root = 'data/imagenet/train'
+data_train_list = 'data/VOCdevkit/VOC2007/Lists/trainvaltest.txt'
+data_train_root = 'data//VOCdevkit/VOC2007/JPEGImages'
 dataset_type = 'DeepClusterDataset'
 img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 train_pipeline = [
@@ -100,7 +102,7 @@ custom_hooks = [
 ]
 # optimizer
 optimizer = dict(
-    type='SGD', lr=0.06, momentum=0.9, weight_decay=0.00001,
+    type='SGD', lr=0.06/8, momentum=0.9, weight_decay=0.00001,
     nesterov=False,
     paramwise_options={'\Ahead.': dict(momentum=0.)})
 # learning policy

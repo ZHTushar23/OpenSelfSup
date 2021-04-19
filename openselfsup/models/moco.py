@@ -188,7 +188,47 @@ class MOCO(nn.Module):
         return losses
 
     def forward_test(self, img, **kwargs):
-        pass
+        #pass
+        """Forward computation during validation.
+
+        Args:
+            img (Tensor): Input of two concatenated images of shape (N, 2, C, H, W).
+                Typically these should be mean centered and std scaled.
+
+        Returns:
+            dict[str, Tensor]: A dictionary of loss components.
+        """
+        assert img.dim() == 5, \
+            "Input must have 5 dims, got: {}".format(img.dim())
+        im_q = img[:, 0, ...].contiguous()
+        im_k = img[:, 1, ...].contiguous()
+        # compute query features
+        q = self.encoder_q(im_q)[0]  # queries: NxC
+        q = nn.functional.normalize(q, dim=1)
+
+        # compute key features
+        with torch.no_grad():  # no gradient to keys
+            self._momentum_update_key_encoder()  # update the key encoder
+
+            # shuffle for making use of BN
+            im_k, idx_unshuffle = self._batch_shuffle_ddp(im_k)
+
+            k = self.encoder_k(im_k)[0]  # keys: NxC
+            k = nn.functional.normalize(k, dim=1)
+
+            # undo shuffle
+            k = self._batch_unshuffle_ddp(k, idx_unshuffle)
+
+        # compute logits
+        # Einstein sum is more intuitive
+        # positive logits: Nx1
+        l_pos = torch.einsum('nc,nc->n', [q, k]).unsqueeze(-1)
+        # negative logits: NxK
+        l_neg = torch.einsum('nc,ck->nk', [q, self.queue.clone().detach()])
+
+        losses = self.head(l_pos, l_neg)
+
+        return losses
 
     def forward(self, img, mode='train', **kwargs):
         if mode == 'train':

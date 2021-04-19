@@ -47,8 +47,9 @@ def task(cls, cost, opts, features, targets):
             penalty='l2',
             loss='squared_hinge',
             tol=0.0001,
-            dual=True,
-            max_iter=2000,
+            dual=True,max_iter = 500,
+	
+            #max_iter=2000,
         )
         cls_labels = targets[:, cls].astype(dtype=np.int32, copy=True)
         cls_labels[np.where(cls_labels == 0)] = -1

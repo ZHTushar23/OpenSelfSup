@@ -3,7 +3,7 @@ from PIL import Image
 from .registry import DATASETS
 from .base import BaseDataset
 from .utils import to_numpy
-
+from openselfsup.utils import print_log
 
 @DATASETS.register_module
 class ContrastiveDataset(BaseDataset):
@@ -30,4 +30,12 @@ class ContrastiveDataset(BaseDataset):
         return dict(img=img_cat)
 
     def evaluate(self, scores, keyword, logger=None, **kwargs):
-        raise NotImplemented
+        #raise NotImplemented
+        eval_res = {"val_{}".format(keyword): scores}
+
+        if logger is not None and logger != 'silent':
+            print_log(
+                "val_{}: {:.03f}".format(keyword, scores),
+                logger=logger)
+
+        return eval_res

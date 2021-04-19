@@ -49,7 +49,7 @@ class Cifar10(Cifar):
     def set_cifar(self):
         try:
             self.cifar = CIFAR10(
-                root=self.root, train=self.split == 'train', download=False)
+                root=self.root, train=self.split == 'train', download=True)
         except:
             raise Exception("Please download CIFAR10 manually, \
                   in case of downloading the dataset parallelly \

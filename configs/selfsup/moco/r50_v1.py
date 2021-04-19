@@ -23,8 +23,23 @@ data_source_cfg = dict(
     type='ImageNet',
     memcached=True,
     mclient_path='/mnt/lustre/share/memcached_client')
-data_train_list = 'data/imagenet/meta/train.txt'
-data_train_root = 'data/imagenet/train'
+#data_train_list = 'data/imagenet/meta/train.txt'
+#data_train_root = 'data/imagenet/train'
+#data_train_list = 'data/VOCdevkit/VOC2007/meta/train.txt'
+#data_train_root = 'data/VOCdevkit/VOC2007/JPEGImages'
+#data_test_list = 'data/VOCdevkit/VOC2007/meta/test.txt'
+#data_test_root = 'data/VOCdevkit/VOC2007/JPEGImages'
+
+# data_test_list = 'data/isic2017/meta/test.txt'
+# data_test_root = 'data/isic2017/test'
+# data_train_list = 'data/isic2017/meta/train.txt'
+# data_train_root = 'data/isic2017/train'
+
+data_test_list = 'data/x_ray_dataset/test_list.txt'
+data_test_root = 'data/x_ray_dataset/images'
+data_train_list = 'data/x_ray_dataset/train_val_list.txt'
+data_train_root = 'data/x_ray_dataset/images'
+
 dataset_type = 'ContrastiveDataset'
 img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 train_pipeline = [
@@ -54,11 +69,32 @@ data = dict(
             **data_source_cfg),
         pipeline=train_pipeline,
         prefetch=prefetch,
-    ))
+    ),    val = dict(
+        type=dataset_type,
+        data_source=dict(
+            list_file=data_test_list, root=data_test_root,
+            **data_source_cfg),
+        pipeline=train_pipeline,
+        prefetch=prefetch,
+    )
+)
+
+# additional hooks
+custom_hooks = [dict(
+        type='NewValidateHook',
+        dataset=data['val'],
+        initial=True,
+        interval=1,
+        imgs_per_gpu=32,
+        workers_per_gpu=5,
+        prefetch=prefetch,
+        img_norm_cfg=img_norm_cfg)
+]
 # optimizer
-optimizer = dict(type='SGD', lr=0.03, weight_decay=0.0001, momentum=0.9)
+optimizer = dict(type='SGD', lr=0.03/8, weight_decay=0.0001, momentum=0.9)
+optimizer_config = dict(update_interval=8)
 # learning policy
 lr_config = dict(policy='step', step=[120, 160])
 checkpoint_config = dict(interval=10)
 # runtime settings
-total_epochs = 200
+total_epochs = 100

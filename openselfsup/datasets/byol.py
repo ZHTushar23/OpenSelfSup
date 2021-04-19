@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from torch.utils.data import Dataset
 
 from openselfsup.utils import build_from_cfg
@@ -8,6 +9,7 @@ from torchvision.transforms import Compose
 from .registry import DATASETS, PIPELINES
 from .builder import build_datasource
 from .utils import to_numpy
+from openselfsup.utils import print_log
 
 
 @DATASETS.register_module
@@ -38,4 +40,12 @@ class BYOLDataset(Dataset):
         return dict(img=img_cat)
 
     def evaluate(self, scores, keyword, logger=None, **kwargs):
-        raise NotImplemented
+        # raise NotImplemented
+        eval_res = {"val_{}".format(keyword): scores}
+
+        if logger is not None and logger != 'silent':
+            print_log(
+                "val_{}: {:.03f}".format(keyword, scores),
+                logger=logger)
+
+        return eval_res
