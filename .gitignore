@@ -126,3 +126,6 @@ tensorboard.sh
 replace.sh
 benchmarks/detection/datasets
 benchmarks/detection/output
+
+data
+work_dirs
