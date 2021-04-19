@@ -13,19 +13,20 @@ model = dict(
         frozen_stages=4),
     head=dict(
         type='MultiClsClassificationHead', with_avg_pool=True, in_channels=2048,
-        num_classes=14))
+        num_classes=15))
 # dataset settings
 data_source_cfg = dict(
-    type='ImageNet',
+    type='XRay',
     memcached=True,
     mclient_path='/mnt/lustre/share/memcached_client')
 
-data_train_list = 'data/x_ray_dataset/trainval_labeled.txt'
+data_train_list = 'data/x_ray_dataset/meta/trainval_labeled.txt'
 data_train_root = 'data/x_ray_dataset/images'
-data_test_list = 'data/x_ray_dataset/test_labeled.txt'
+data_test_list = 'data/x_ray_dataset/meta/test_labeled.txt'
 data_test_root = 'data/x_ray_dataset/images'
 dataset_type = 'ClassificationDataset'
-img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+img_norm_cfg = dict(mean=[0.5245, 0.5245, 0.5245], std =[0.2589, 0.2589, 0.2589])
 train_pipeline = [
     dict(type='RandomResizedCrop', size=224),
     dict(type='RandomHorizontalFlip'),
@@ -69,7 +70,8 @@ custom_hooks = [
         eval_param=dict(topk=(1, 5)))
 ]
 # optimizer
-optimizer = dict(type='SGD', lr=30., momentum=0.9, weight_decay=0.)
+optimizer = dict(type='SGD', lr=30./8, momentum=0.9, weight_decay=0.)
+optimizer_config = dict(update_interval=8)
 # learning policy
 lr_config = dict(policy='step', step=[60, 80])
 checkpoint_config = dict(interval=10)

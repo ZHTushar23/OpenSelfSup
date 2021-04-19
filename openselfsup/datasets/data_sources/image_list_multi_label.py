@@ -41,7 +41,7 @@ class ImageListMultiLabel(object):
             img = self.mc_loader(self.fns[idx])
         else:
             img = Image.open(self.fns[idx])
-        # img = img.convert('RGB')
+        img = img.convert('RGB')
         if self.has_labels and self.return_label:
             target = self.labels[idx]
             return img, target

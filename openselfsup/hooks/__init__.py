@@ -7,3 +7,4 @@ from .extractor import Extractor
 from .validate_hook import ValidateHook
 from .registry import HOOKS
 from .new_validate_hook import NewValidateHook
+from .multi_validate_hook import MultiValidateHook

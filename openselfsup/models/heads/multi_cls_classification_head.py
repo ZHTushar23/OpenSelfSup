@@ -1,4 +1,5 @@
 import torch.nn as nn
+from mmcv.cnn import kaiming_init, normal_init
 
 from ..utils import accuracy
 from ..registry import HEADS

@@ -11,7 +11,7 @@ from .registry import HOOKS
 
 
 @HOOKS.register_module
-class ValidateHook(Hook):
+class MultiValidateHook(Hook):
     """Validation hook.
 
     Args:
@@ -77,7 +77,7 @@ class ValidateHook(Hook):
             print(target)
             print(results['head0'].shape)
 
-            criterion = nn.CrossEntropyLoss()
+            criterion = nn.BCEWithLogitsLoss()
             val_loss = criterion(torch.from_numpy(results['head0']), target)
 
             print("val_loss: ",val_loss)
