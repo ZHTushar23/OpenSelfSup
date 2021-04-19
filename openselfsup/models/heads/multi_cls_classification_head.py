@@ -2,53 +2,37 @@ import torch.nn as nn
 
 from ..utils import accuracy
 from ..registry import HEADS
-from ..utils import build_norm_layer, MultiPooling
 
 
 @HEADS.register_module
 class MultiClsClassificationHead(nn.Module):
-    """Multiple classifier heads.
+    """Simplest classifier head, with only one fc layer. Works for Multi-label dataset.
     """
 
-    FEAT_CHANNELS = {'resnet50': [64, 256, 512, 1024, 2048]}
-    FEAT_LAST_UNPOOL = {'resnet50': 2048 * 7 * 7}
-
     def __init__(self,
-                 pool_type='adaptive',
-                 in_indices=(0, ),
-                 with_last_layer_unpool=False,
-                 backbone='resnet50',
-                 norm_cfg=dict(type='BN'),
-                 num_classes=1000):
+                 with_avg_pool=False,
+                 in_channels=2048,
+                 num_classes=15):
         super(MultiClsClassificationHead, self).__init__()
-        assert norm_cfg['type'] in ['BN', 'SyncBN', 'GN', 'null']
-
-        self.with_last_layer_unpool = with_last_layer_unpool
-        self.with_norm = norm_cfg['type'] != 'null'
+        self.with_avg_pool = with_avg_pool
+        self.in_channels = in_channels
+        self.num_classes = num_classes
 
         self.criterion = nn.BCEWithLogitsLoss()
 
-        self.multi_pooling = MultiPooling(pool_type, in_indices, backbone)
+        if self.with_avg_pool:
+            self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc_cls = nn.Linear(in_channels, num_classes)
 
-        if self.with_norm:
-            self.norms = nn.ModuleList([
-                build_norm_layer(norm_cfg, self.FEAT_CHANNELS[backbone][l])[1]
-                for l in in_indices
-            ])
-
-        self.fcs = nn.ModuleList([
-            nn.Linear(self.multi_pooling.POOL_DIMS[backbone][l], num_classes)
-            for l in in_indices
-        ])
-        if with_last_layer_unpool:
-            self.fcs.append(
-                nn.Linear(self.FEAT_LAST_UNPOOL[backbone], num_classes))
-
-    def init_weights(self):
+    def init_weights(self, init_linear='normal', std=0.01, bias=0.):
+        assert init_linear in ['normal', 'kaiming'], \
+            "Undefined init_linear: {}".format(init_linear)
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
+                if init_linear == 'normal':
+                    normal_init(m, std=std, bias=bias)
+                else:
+                    kaiming_init(m, mode='fan_in', nonlinearity='relu')
             elif isinstance(m,
                             (nn.BatchNorm2d, nn.GroupNorm, nn.SyncBatchNorm)):
                 if m.weight is not None:
@@ -57,22 +41,19 @@ class MultiClsClassificationHead(nn.Module):
                     nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
-        assert isinstance(x, (list, tuple))
-        if self.with_last_layer_unpool:
-            last_x = x[-1]
-        x = self.multi_pooling(x)
-        if self.with_norm:
-            x = [n(xx) for n, xx in zip(self.norms, x)]
-        if self.with_last_layer_unpool:
-            x.append(last_x)
-        x = [xx.view(xx.size(0), -1) for xx in x]
-        x = [fc(xx) for fc, xx in zip(self.fcs, x)]
-        return x
+        assert isinstance(x, (tuple, list)) and len(x) == 1
+        x = x[0]
+        if self.with_avg_pool:
+            assert x.dim() == 4, \
+                "Tensor must has 4 dims, got: {}".format(x.dim())
+            x = self.avg_pool(x)
+        x = x.view(x.size(0), -1)
+        cls_score = self.fc_cls(x)
+        return [cls_score]
 
     def loss(self, cls_score, labels):
         losses = dict()
-        for i, s in enumerate(cls_score):
-            # keys must contain "loss"
-            losses['loss.{}'.format(i + 1)] = self.criterion(s, labels)
-            losses['acc.{}'.format(i + 1)] = accuracy(s, labels)
+        assert isinstance(cls_score, (tuple, list)) and len(cls_score) == 1
+        losses['loss'] = self.criterion(cls_score[0], labels)
+        losses['acc'] = accuracy(cls_score[0], labels)
         return losses

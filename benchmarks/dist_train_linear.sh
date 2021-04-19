@@ -15,10 +15,13 @@ if [ "$CFG" == "" ] || [ "$PRETRAIN" == "" ]; then
 fi
 
 WORK_DIR="$(echo ${CFG%.*} | sed -e "s/configs/work_dirs/g")/$(echo $PRETRAIN | rev | cut -d/ -f 1 | rev)"
-
+echo $WORK_DIR
 # train
 python -m torch.distributed.launch --nproc_per_node=$GPUS --master_port=$PORT \
-    tools/train.py \
-    $CFG \
+   tools/train.py \
+   $CFG \
     --pretrained $PRETRAIN \
     --work_dir $WORK_DIR --seed 0 --launcher="pytorch" ${PY_ARGS}
+
+# Generate loss and accuracy graph
+#python benchmarks/gen_stat_graph_json.py --work_dir $WORK_DIR --pretrained $PRETRAIN

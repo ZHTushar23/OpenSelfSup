@@ -35,7 +35,8 @@ def extract_loss_from_log_file(logfile):
         with open(logfile, 'r') as f:
             for line in f:
                 if keyword1 in line:
-                    tmp_loss.append(extract_loss_info(line))
+                    if "memory:" in line:
+                        tmp_loss.append(extract_loss_info(line))
 
         loss[epoch] = np.array(tmp_loss).mean()
     return loss
@@ -60,6 +61,7 @@ if __name__=="__main__":
             logfile_name = file
 
     loss = extract_loss_from_log_file(logfile_name)
+    val_loss = extract_val_loss_from_log_file(logfile_name)
     pretext_task = extract_task_name(logfile_name)
 
     plt.figure(1)
@@ -69,4 +71,12 @@ if __name__=="__main__":
     plt.legend(loc='upper right')
     plt.title(f'Pretrained: {args.pretrained}\nBackbone Training: PT-{pretext_task}, DS: {args.training_dataset}')
     plt.savefig('loss.png')
+
+    plt.figure(2)
+    plt.plot(val_loss, label='backbone validation loss, min loss: ' + str(np.min(val_loss)))
+    plt.ylabel('Loss')
+    plt.xlabel('Epochs')
+    plt.legend(loc='upper right')
+    plt.title(f'Pretrained: {args.pretrained}\nBackbone Training: PT-{pretext_task}, DS: {args.training_dataset} (Val)')
+    plt.savefig('val_loss.png')
     # plt.show()
