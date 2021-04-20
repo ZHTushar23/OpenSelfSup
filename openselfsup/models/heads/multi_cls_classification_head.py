@@ -1,7 +1,7 @@
 import torch.nn as nn
 from mmcv.cnn import kaiming_init, normal_init
 
-from ..utils import accuracy
+from ..utils import multi_label_accuracy
 from ..registry import HEADS
 
 
@@ -56,5 +56,5 @@ class MultiClsClassificationHead(nn.Module):
         losses = dict()
         assert isinstance(cls_score, (tuple, list)) and len(cls_score) == 1
         losses['loss'] = self.criterion(cls_score[0], labels)
-        losses['acc'] = accuracy(cls_score[0], labels)
+        losses['acc'] = multi_label_accuracy(cls_score[0], labels)
         return losses

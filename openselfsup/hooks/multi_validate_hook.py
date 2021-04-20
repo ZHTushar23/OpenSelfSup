@@ -91,8 +91,7 @@ class MultiValidateHook(Hook):
         eval_res = self.dataset.evaluate(
             results,
             keyword=keyword,
-            logger=runner.logger,
-            **self.eval_kwargs['eval_param'])
+            logger=runner.logger)
         for name, val in eval_res.items():
             runner.log_buffer.output[name] = val
         # runner.log_buffer.ready = True

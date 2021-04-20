@@ -67,7 +67,7 @@ custom_hooks = [
         workers_per_gpu=4,
         prefetch=prefetch,
         img_norm_cfg=img_norm_cfg,
-        eval_param=dict(topk=(1, 5)))
+        )
 ]
 # optimizer
 optimizer = dict(type='SGD', lr=30./8, momentum=0.9, weight_decay=0.)

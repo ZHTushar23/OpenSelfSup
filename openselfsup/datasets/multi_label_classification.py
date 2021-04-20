@@ -1,5 +1,6 @@
 import torch
-
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_recall_curve
 from openselfsup.utils import print_log
 
 from .registry import DATASETS
@@ -23,30 +24,35 @@ class MultiLabelClassificationDataset(BaseDataset):
             img = torch.from_numpy(to_numpy(img))
         return dict(img=img, gt_label=target)
 
-    def evaluate(self, scores, keyword, logger=None, topk=(1, 5)):
+    def evaluate(self, scores, keyword, logger=None):
         eval_res = {}
 
         target = self.get_labels()
         assert scores.size(0) == target.size(0), \
             "Inconsistent length for results and labels, {} vs {}".format(
             scores.size(0), target.size(0))
-        num = scores.size(0)
-        _, pred = scores.topk(max(topk), dim=1, largest=True, sorted=True)
-        pred = pred.t()
-        print("#################################################################################################")
-        print(target.shape)
-        print(scores.shape)
-        correct = pred.eq(target.view(1, -1).expand_as(pred))  # KxN
 
-        for k in topk:
-            correct_k = correct[:k].contiguous().view(-1).float().sum(0).item()
-            acc = correct_k * 100.0 / num
-            eval_res["{}_top{}".format(keyword, k)] = acc
+        n_classes = scores.size(1)
+        target = target.cpu().detach().numpy()
+        scores = scores.cpu().detach().numpy()
+        # For each class
+        precision = dict()
+        recall = dict()
+        average_precision = dict()
+        for i in range(n_classes):
+            precision[i], recall[i], _ = precision_recall_curve(target[:, i],
+                                                                scores[:, i])
+            average_precision[i] = average_precision_score(target[:, i], scores[:, i])
 
-            if logger is not None and logger != 'silent':
-                print_log(
-                    "{}_top{}: {:.03f}".format(keyword, k, acc),
-                    logger=logger)
+        # A "micro-average": quantifying score on all classes jointly
+        precision["micro"], recall["micro"], _ = precision_recall_curve(target.ravel(),
+                                                                        scores.ravel())
+        average_precision["micro"] = average_precision_score(target, scores,
+                                                             average="micro")
+        if logger is not None and logger != 'silent':
+            print_log('Average precision score, '
+                      'micro-averaged over all classes: {0:0.2f}'.format(average_precision["micro"]),
+                      logger=logger)
 
         return eval_res
 
@@ -64,4 +70,4 @@ class MultiLabelClassificationDataset(BaseDataset):
         label_tensor = torch.zeros(self.data_source.total_classes)
         idx = [int(n) for n in label]
         label_tensor[idx] =1
-        return label_tensor.long()
+        return label_tensor
