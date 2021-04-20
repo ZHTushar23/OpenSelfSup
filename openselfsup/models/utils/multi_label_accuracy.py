@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 from sklearn.metrics import average_precision_score
 
 def multi_label_accuracy(pred, target):
@@ -7,7 +8,8 @@ def multi_label_accuracy(pred, target):
     pred = pred.cpu().detach().numpy()
     average_precision = average_precision_score(target, pred,
                                                          average="micro")
-    return average_precision
+
+    return torch.tensor(average_precision).cuda()
 
 
 class MultiLabelAccuracy(nn.Module):

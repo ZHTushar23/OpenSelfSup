@@ -54,7 +54,7 @@ class MultiLabelClassificationDataset(BaseDataset):
                       'micro-averaged over all classes: {0:0.2f}'.format(average_precision["micro"]),
                       logger=logger)
 
-        return eval_res
+        return average_precision
 
     def get_labels(self):
         labels = self.data_source.labels
