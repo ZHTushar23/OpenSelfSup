@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--work_dir', default=None, help='working directory missing')
     parser.add_argument(
         '--pretrained', default=None, help='pretrained model file')
-    parser.add_argument('--training_dataset', default='VOC07', help='working directory missing')
+    parser.add_argument('--training_dataset', default='isic2017', help='working directory missing')
     args = parser.parse_args()
 
     os.chdir(args.work_dir)
