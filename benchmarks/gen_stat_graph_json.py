@@ -74,7 +74,7 @@ if __name__=="__main__":
 
     plt.figure(4)
     plt.plot(val_loss, label='classifier val_loss, min loss: ' + str(np.min(val_loss)))
-    plt.ylabel('Accuracy')
+    plt.ylabel('Loss')
     plt.xlabel('Epochs')
     plt.legend(loc='upper right')
     plt.title(f'Pretrained: {args.pretrained}')
