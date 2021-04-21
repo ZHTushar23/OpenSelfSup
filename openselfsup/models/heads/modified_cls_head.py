@@ -25,7 +25,8 @@ class ModifiedClsHead(nn.Module):
         if self.with_avg_pool:
             self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc1 = nn.Linear(in_channels, hid_channels)
-        self.bn1 = nn.BatchNorm2d(hid_channels)
+        self.relu = nn.ReLU()
+        self.bn1 = nn.BatchNorm1d(hid_channels)
         self.fc_cls = nn.Linear(hid_channels, num_classes)
 
     def init_weights(self, init_linear='normal', std=0.01, bias=0.):
@@ -51,8 +52,8 @@ class ModifiedClsHead(nn.Module):
             assert x.dim() == 4, \
                 "Tensor must has 4 dims, got: {}".format(x.dim())
             x = self.avg_pool(x)
-        x = self.fc1(x)
-        x = self.bn1(x)
+        x = x.view(x.size(0), -1)
+        x = self.relu(self.bn1(self.fc1(x)))
         x = x.view(x.size(0), -1)
         cls_score = self.fc_cls(x)
         return [cls_score]

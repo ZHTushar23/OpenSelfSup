@@ -7,7 +7,7 @@ def multi_label_accuracy(pred, target):
     target = target.cpu().detach().numpy()
     pred = pred.cpu().detach().numpy()
     average_precision = average_precision_score(target, pred,
-                                                         average="micro")
+                                                         average="micro")*100
 
     return torch.tensor(average_precision).cuda()
 

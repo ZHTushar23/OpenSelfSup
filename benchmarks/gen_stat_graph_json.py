@@ -24,7 +24,7 @@ def extract_info_from_log_file(logfile):
                         train_acc[epoch] = float(line['acc'])
 
                     elif line["mode"]=="val":
-                        top1_acc[epoch] = float(line['head0_top1'])
+                        top1_acc[epoch] = float(line['micro'])
                         val_loss[epoch] = float(line['val_loss'])
 
 
@@ -41,7 +41,6 @@ if __name__=="__main__":
 
     for file in glob.glob("*.json"):
         logfile_name = file
-
     # Opening JSON file
     logfile = []
     for line in open(logfile_name, 'r'):

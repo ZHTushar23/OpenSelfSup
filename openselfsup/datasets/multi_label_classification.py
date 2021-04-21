@@ -47,11 +47,11 @@ class MultiLabelClassificationDataset(BaseDataset):
         # A "micro-average": quantifying score on all classes jointly
         precision["micro"], recall["micro"], _ = precision_recall_curve(target.ravel(),
                                                                         scores.ravel())
-        average_precision["micro"] = average_precision_score(target, scores,
-                                                             average="micro")
+        average_precision["mAP"] = average_precision_score(target, scores,
+                                                             average="micro")*100
         if logger is not None and logger != 'silent':
             print_log('Average precision score, '
-                      'micro-averaged over all classes: {0:0.2f}'.format(average_precision["micro"]),
+                      'micro-averaged over all classes: {0:0.2f}'.format(average_precision["mAP"]),
                       logger=logger)
 
         return average_precision
