@@ -70,10 +70,10 @@ custom_hooks = [
         eval_param=dict(topk=(1, 1)))
 ]
 # optimizer
-optimizer = dict(type='SGD', lr=30./8, momentum=0.9, weight_decay=0.)
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.) #lr=30./8,
 optimizer_config = dict(update_interval=16)
 # learning policy
 lr_config = dict(policy='step', step=[60, 80])
 checkpoint_config = dict(interval=10)
 # runtime settings
-total_epochs = 100
+total_epochs = 200

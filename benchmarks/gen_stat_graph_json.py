@@ -7,32 +7,39 @@ import json
 
 def extract_info_from_log_file(logfile):
     # Extract the total number of epochs
-    num_epochs = 100
+    num_epochs = 200
 
     # Create empty array to store loss and acc values
-    train_loss     = np.zeros([num_epochs])
-    train_acc      = np.zeros_like(train_loss)
-    top1_acc       = np.zeros([num_epochs])
-    val_loss       = np.zeros([num_epochs])
+    train_loss = np.zeros([num_epochs])
+    train_acc = np.zeros_like(train_loss)
+    top1_acc = np.zeros([num_epochs])
+    val_loss = np.zeros([num_epochs])
 
     for epoch in range(num_epochs):
+        tmp_loss = []
+        tmp_acc = []
         for line in logfile:
             for name in line.keys():
-                if name == 'epoch' and line[name]==epoch+1:
-                    if line["mode"]=="train":
-                        train_loss[epoch] = float(line['loss'])
-                        train_acc[epoch] = float(line['acc'])
+                if name == 'epoch' and line[name] == epoch + 1:
+                    if line["mode"] == "train":
+                        tmp_loss.append(float(line['loss']))
+                        tmp_acc.append(float(line['acc']))
+                        # train_loss[epoch] = float(line['loss'])
+                        # train_acc[epoch] = float(line['acc'])
 
-                    elif line["mode"]=="val":
-                        top1_acc[epoch] = float(line['micro'])
+                    elif line["mode"] == "val":
+                        top1_acc[epoch] = float(line['head0_top1'])
                         val_loss[epoch] = float(line['val_loss'])
 
+        train_loss[epoch] = np.array(tmp_loss).mean()
+        train_acc[epoch] = np.array(tmp_acc).mean()
 
-    return train_loss,train_acc,top1_acc,val_loss
+    return train_loss, train_acc, top1_acc, val_loss
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--work_dir',default=None,help='working directory missing')
+    parser.add_argument('--work_dir', default=None, help='working directory missing')
     parser.add_argument('--pretrained', default=None, help='working directory missing')
 
     args = parser.parse_args()
@@ -46,7 +53,7 @@ if __name__=="__main__":
     for line in open(logfile_name, 'r'):
         logfile.append(json.loads(line))
 
-    train_loss, train_acc, top1, val_loss =  extract_info_from_log_file(logfile)
+    train_loss, train_acc, top1, val_loss = extract_info_from_log_file(logfile)
 
     plt.figure(1)
     plt.plot(train_loss, label='classifier training loss, min loss: ' + str(np.min(train_loss)))
@@ -80,5 +87,4 @@ if __name__=="__main__":
     plt.title(f'Pretrained: {args.pretrained}')
     plt.savefig('val_loss.png')
 
-
-    #plt.show()
+    # plt.show()

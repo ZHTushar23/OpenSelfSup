@@ -130,10 +130,10 @@ custom_hooks = [
         img_norm_cfg=img_norm_cfg)
 ]
 # optimizer
-optimizer = dict(type='LARS', lr=4.8/8, weight_decay=0.000001, momentum=0.9,
+optimizer = dict(type='LARS', lr=4.8/16, weight_decay=0.000001, momentum=0.9,
                  paramwise_options={
                     '(bn|gn)(\d+)?.(weight|bias)': dict(weight_decay=0., lars_exclude=True),
-                    'bias': dict(weight_decay=0., lars_exclude=True)})
+                    'bias': dict(weight_decay=0., lars_exclude=True)}) #lr=4.8/8,
 # apex
 use_fp16 = False
 optimizer_config = dict(update_interval=update_interval, use_fp16=use_fp16)

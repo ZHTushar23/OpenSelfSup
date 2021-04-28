@@ -7,7 +7,7 @@ import json
 
 def extract_loss_from_log_file(logfile):
     # Extract the total number of epochs
-    num_epochs = 100
+    num_epochs = 200
 
     # Create empty array to store loss and acc values
     loss     = np.zeros([num_epochs])
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         logfile.append(json.loads(line))
 
     loss, val_loss = extract_loss_from_log_file(logfile)
-    pretext_task = "MOCO"
+    pretext_task = "MOCO2"
 
     plt.figure(1)
     plt.plot(loss, label='backbone training loss, min loss: ' + str(np.min(loss)))
