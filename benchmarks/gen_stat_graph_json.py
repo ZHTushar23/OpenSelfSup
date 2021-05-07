@@ -7,7 +7,7 @@ import json
 
 def extract_info_from_log_file(logfile):
     # Extract the total number of epochs
-    num_epochs = 200
+    num_epochs = 100
 
     # Create empty array to store loss and acc values
     train_loss = np.zeros([num_epochs])
