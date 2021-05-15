@@ -1,5 +1,6 @@
 import torch
-
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 from openselfsup.utils import print_log
 
 from .registry import DATASETS
@@ -8,12 +9,12 @@ from .utils import to_numpy
 
 
 @DATASETS.register_module
-class ClassificationDataset(BaseDataset):
+class ClassificationPerClassDataset(BaseDataset):
     """Dataset for classification.
     """
 
     def __init__(self, data_source, pipeline, prefetch=False):
-        super(ClassificationDataset, self).__init__(data_source, pipeline, prefetch)
+        super(ClassificationPerClassDataset, self).__init__(data_source, pipeline, prefetch)
 
     def __getitem__(self, idx):
         img, target = self.data_source.get_sample(idx)
@@ -26,25 +27,20 @@ class ClassificationDataset(BaseDataset):
         eval_res = {}
 
         target = torch.LongTensor(self.data_source.labels)
+        print("#############################################################")
+        print("Target Shape", target.shape)
         assert scores.size(0) == target.size(0), \
             "Inconsistent length for results and labels, {} vs {}".format(
             scores.size(0), target.size(0))
         num = scores.size(0)
         _, pred = scores.topk(max(topk), dim=1, largest=True, sorted=True)
-        pred = pred.t()
-
-        correct = pred.eq(target.view(1, -1).expand_as(pred))  # KxN
-
-        for k in topk:
-            correct_k = correct[:k].contiguous().view(-1).float().sum(0).item()
-            acc = correct_k * 100.0 / num
-            eval_res["{}_top{}".format(keyword, k)] = acc
-
-            if logger is not None and logger != 'silent':
-                print_log(
-                    "{}_top{}: {:.03f}".format(keyword, k, acc),
-                    logger=logger)
-
+        pred=torch.squeeze(pred,1)
+        target_names = ['Others', 'Melanoma']
+        results = (classification_report(target, pred, target_names=target_names, digits=4))
+        if logger is not None and logger != 'silent':
+            print_log("\n"+results,
+                logger=logger)
+        eval_res=results
         return eval_res
 
     def get_labels(self):

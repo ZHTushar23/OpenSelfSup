@@ -7,7 +7,7 @@ from ..registry import HEADS
 
 @HEADS.register_module
 class ModifiedClsHead(nn.Module):
-    """Simplest classifier head, with only one fc layer.
+    """Simplest classifier head, with two fc layer.
     """
 
     def __init__(self,

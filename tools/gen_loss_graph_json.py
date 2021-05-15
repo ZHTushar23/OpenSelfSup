@@ -46,7 +46,7 @@ if __name__ == "__main__":
         logfile.append(json.loads(line))
 
     loss, val_loss = extract_loss_from_log_file(logfile)
-    pretext_task = "MOCO2"
+    pretext_task = "BYOL"
 
     plt.figure(1)
     plt.plot(loss, label='backbone training loss, min loss: ' + str(np.min(loss)))

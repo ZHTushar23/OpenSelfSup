@@ -128,4 +128,5 @@ benchmarks/detection/datasets
 benchmarks/detection/output
 
 data
-work_dirs
+work_dirs_old
+openselfsup/utils/version.py

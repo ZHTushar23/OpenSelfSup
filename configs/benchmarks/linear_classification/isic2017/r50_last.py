@@ -23,13 +23,13 @@ data_train_list = 'data/isic2017/meta/train_labeled.txt'
 data_train_root = 'data/isic2017/train'
 data_test_list = 'data/isic2017/meta/test_labeled.txt'
 data_test_root = 'data/isic2017/test'
-dataset_type = 'ClassificationDataset'
-
+# dataset_type = 'ClassificationDataset'
+dataset_type = 'ClassificationPerClassDataset'
 #ImageNet Normalization Config
-img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+# img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 #isic2017 image normalization config
-# img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
+img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
 train_pipeline = [
     dict(type='RandomResizedCrop', size=224),
     dict(type='RandomHorizontalFlip'),
@@ -44,7 +44,7 @@ if not prefetch:
     train_pipeline.extend([dict(type='ToTensor'), dict(type='Normalize', **img_norm_cfg)])
     test_pipeline.extend([dict(type='ToTensor'), dict(type='Normalize', **img_norm_cfg)])
 data = dict(
-    imgs_per_gpu=32*2,  # total 32*8=256, 8GPU linear cls
+    imgs_per_gpu=32,  # total 32*8=256, 8GPU linear cls
     workers_per_gpu=5,
     train=dict(
         type=dataset_type,
@@ -76,7 +76,7 @@ custom_hooks = [
 optimizer = dict(type='SGD', lr=30/8, momentum=0.9, weight_decay=0.) #lr=30./8
 optimizer_config = dict(update_interval=8)
 # learning policy
-lr_config = dict(policy='step', step=[60, 80])
+lr_config = dict(policy='step', step=[200, 200])
 checkpoint_config = dict(interval=10)
 # runtime settings
-total_epochs = 10
+total_epochs = 200

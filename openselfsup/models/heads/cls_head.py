@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 from mmcv.cnn import kaiming_init, normal_init
 
@@ -18,8 +19,8 @@ class ClsHead(nn.Module):
         self.with_avg_pool = with_avg_pool
         self.in_channels = in_channels
         self.num_classes = num_classes
-
-        self.criterion = nn.CrossEntropyLoss()
+        self.weight = torch.Tensor([0.813,0.187])
+        self.criterion = nn.CrossEntropyLoss(weight=self.weight)
 
         if self.with_avg_pool:
             self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))

@@ -75,8 +75,6 @@ class ValidateHook(Hook):
             target =   self.dataset.get_labels()
             criterion = nn.CrossEntropyLoss()
             val_loss = criterion(torch.from_numpy(results['head0']), target)
-
-            print("val_loss: ",val_loss)
         else:
             results = nondist_forward_collect(func, self.data_loader,
                                               len(self.dataset))
@@ -95,4 +93,4 @@ class ValidateHook(Hook):
             **self.eval_kwargs['eval_param'])
         for name, val in eval_res.items():
             runner.log_buffer.output[name] = val
-        # runner.log_buffer.ready = True
+        runner.log_buffer.ready = True
