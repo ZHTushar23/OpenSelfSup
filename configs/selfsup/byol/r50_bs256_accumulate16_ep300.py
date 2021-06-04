@@ -41,23 +41,24 @@ data_source_cfg = dict(
 # data_test_list = 'data/VOCdevkit/VOC2007/meta/test.txt'
 # data_test_root = 'data/VOCdevkit/VOC2007/JPEGImages'
 
-data_test_list = 'data/isic2017/meta/test.txt'
-data_test_root = 'data/isic2017/test'
-data_train_list = 'data/isic2017/meta/train.txt'
-data_train_root = 'data/isic2017/train'
+# data_test_list = 'data/isic2017/meta/test.txt'
+# data_test_root = 'data/isic2017/test'
+# data_train_list = 'data/isic2017/meta/train.txt'
+# data_train_root = 'data/isic2017/train'
 
-# data_test_list = 'data/x_ray_dataset/test_list.txt'
-# data_test_root = 'data/x_ray_dataset/images'
-# data_train_list = 'data/x_ray_dataset/train_val_list.txt'
-# data_train_root = 'data/x_ray_dataset/images'
+data_test_list = 'data/x_ray_dataset/test_list.txt'
+data_test_root = 'data/x_ray_dataset/images'
+data_train_list = 'data/x_ray_dataset/train_val_list.txt'
+data_train_root = 'data/x_ray_dataset/images'
 
 dataset_type = 'BYOLDataset'
 #ImageNet Normalization Config
 #img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 #isic2017 Normalization Config
-img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
-
+# img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
+#x-ray dataset config
+img_norm_cfg = dict(mean=[0.5245, 0.5245, 0.5245], std =[0.2589, 0.2589, 0.2589])
 train_pipeline = [
     dict(type='RandomResizedCrop', size=224, interpolation=3),
     dict(type='RandomHorizontalFlip'),
@@ -130,7 +131,7 @@ custom_hooks = [
         img_norm_cfg=img_norm_cfg)
 ]
 # optimizer
-optimizer = dict(type='LARS', lr=4.8/16, weight_decay=0.000001, momentum=0.9,
+optimizer = dict(type='LARS', lr=4.8/8, weight_decay=0.000001, momentum=0.9,
                  paramwise_options={
                     '(bn|gn)(\d+)?.(weight|bias)': dict(weight_decay=0., lars_exclude=True),
                     'bias': dict(weight_decay=0., lars_exclude=True)}) #lr=4.8/8,
@@ -148,4 +149,4 @@ lr_config = dict(
     warmup_by_epoch=True)
 checkpoint_config = dict(interval=10)
 # runtime settings
-total_epochs = 100
+total_epochs = 200

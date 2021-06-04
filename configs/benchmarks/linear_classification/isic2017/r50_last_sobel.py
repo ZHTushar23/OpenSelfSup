@@ -3,11 +3,11 @@ _base_ = '../../../base.py'
 model = dict(
     type='Classification',
     pretrained=None,
-    with_sobel=False,
+    with_sobel=True,
     backbone=dict(
         type='ResNet',
         depth=50,
-        in_channels=3,
+        in_channels=2,
         out_indices=[4],  # 0: conv-1, x: stage-x
         norm_cfg=dict(type='BN'),
         frozen_stages=4),
@@ -26,10 +26,11 @@ data_test_root = 'data/isic2017/test'
 dataset_type = 'ClassificationDataset'
 # dataset_type = 'ClassificationPerClassDataset'
 #ImageNet Normalization Config
-# img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+img_norm_cfg = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 #isic2017 image normalization config
-img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
+# img_norm_cfg = dict(mean=[0.670, 0.585, 0.589], std=[0.177, 0.194, 0.230])
+
 train_pipeline = [
     dict(type='RandomResizedCrop', size=224),
     dict(type='RandomHorizontalFlip'),
@@ -76,7 +77,7 @@ custom_hooks = [
 optimizer = dict(type='SGD', lr=3.75, momentum=0.9, weight_decay=0.) #lr=30./8
 optimizer_config = dict(update_interval=8)
 # learning policy
-lr_config = dict(policy='step', step=[100, 100])
+lr_config = dict(policy='step', step=[200, 200])
 checkpoint_config = dict(interval=10)
 # runtime settings
-total_epochs = 100
+total_epochs = 200

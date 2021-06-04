@@ -1,4 +1,5 @@
 import torch
+from sklearn.metrics import balanced_accuracy_score
 
 from openselfsup.utils import print_log
 
@@ -31,6 +32,12 @@ class ClassificationDataset(BaseDataset):
             scores.size(0), target.size(0))
         num = scores.size(0)
         _, pred = scores.topk(max(topk), dim=1, largest=True, sorted=True)
+
+        ####################################################################
+        _pred = torch.squeeze(pred,1)
+        b_acc = balanced_accuracy_score(target, _pred)*100.0
+
+        #######################################################################
         pred = pred.t()
 
         correct = pred.eq(target.view(1, -1).expand_as(pred))  # KxN
@@ -40,10 +47,16 @@ class ClassificationDataset(BaseDataset):
             acc = correct_k * 100.0 / num
             eval_res["{}_top{}".format(keyword, k)] = acc
 
+            # if logger is not None and logger != 'silent':
+            #     print_log(
+            #         "{}_top{}: {:.03f}".format(keyword, k, acc),
+            #         logger=logger)
+            ########################################
             if logger is not None and logger != 'silent':
                 print_log(
-                    "{}_top{}: {:.03f}".format(keyword, k, acc),
+                    "balanced_acc: {:.03f}".format(b_acc),
                     logger=logger)
+            #######################################
 
         return eval_res
 

@@ -1,5 +1,6 @@
 import torch
 from sklearn.metrics import classification_report
+from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import accuracy_score
 from openselfsup.utils import print_log
 
@@ -27,8 +28,6 @@ class ClassificationPerClassDataset(BaseDataset):
         eval_res = {}
 
         target = torch.LongTensor(self.data_source.labels)
-        print("#############################################################")
-        print("Target Shape", target.shape)
         assert scores.size(0) == target.size(0), \
             "Inconsistent length for results and labels, {} vs {}".format(
             scores.size(0), target.size(0))
@@ -37,8 +36,10 @@ class ClassificationPerClassDataset(BaseDataset):
         pred=torch.squeeze(pred,1)
         target_names = ['Others', 'Melanoma']
         results = (classification_report(target, pred, target_names=target_names, digits=4))
+        b_acc = balanced_accuracy_score(target,pred)
+        log_str = "\n"+results
         if logger is not None and logger != 'silent':
-            print_log("\n"+results,
+            print_log(log_str+"\nBalanced Accuracy Score: {:.03f}".format(b_acc),
                 logger=logger)
         eval_res=results
         return eval_res
